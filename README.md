@@ -1,4 +1,4 @@
-# 点评系统微服务
+# 随便点评（一站式店铺点评系统）
 
 一个基于 Spring Cloud 搭建的微服务点评系统，提供用户、商铺、点评三大核心功能。
 
@@ -57,7 +57,7 @@ evaluation_system/
 -- 创建数据库
 CREATE DATABASE evaluation_system;
 
--- 导入 3个SQL 文件
+-- 导入3个SQL 文件
 source init_data.sql
 ```
 
@@ -97,7 +97,7 @@ npm run dev
 | review-service | /api/review/save | 发表评论 |
 | review-service | /api/review/shop/{id} | 商户评价 |
 
-## 项目学到的东西
+## 项目收获
 
 - 微服务拆分思路
 - Nacos 做服务注册和配置管理
