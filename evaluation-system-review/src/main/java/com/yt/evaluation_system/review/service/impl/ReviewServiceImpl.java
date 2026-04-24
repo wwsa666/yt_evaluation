@@ -4,7 +4,11 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.yt.evaluation_system.common.entity.Review;
+import com.yt.evaluation_system.common.entity.Shop;
+import com.yt.evaluation_system.common.entity.User;
 import com.yt.evaluation_system.common.result.Result;
+import com.yt.evaluation_system.review.feign.ShopClient;
+import com.yt.evaluation_system.review.feign.UserClient;
 import com.yt.evaluation_system.review.mapper.ReviewMapper;
 import com.yt.evaluation_system.review.service.ReviewService;
 import org.apache.commons.lang3.StringUtils;
@@ -23,6 +27,12 @@ public class ReviewServiceImpl extends ServiceImpl<ReviewMapper, Review> impleme
 
     @Autowired
     private RocketMQTemplate rocketMQTemplate;
+
+    @Autowired
+    private UserClient userClient;
+
+    @Autowired
+    private ShopClient shopClient;
 
     @Override
     public Result<String> saveReview(Review review, String token) {
@@ -94,18 +104,27 @@ public class ReviewServiceImpl extends ServiceImpl<ReviewMapper, Review> impleme
         return Result.ok("删除成功");
     }
 
-    @Override
+@Override
     public Result<List<Review>> queryReviewByShop(Long shopId, Integer current, Integer size) {
-        // 由于是微服务，本应通过 Feign 调用 User 服务，为简便直接从 reviews 补充用户信息
-        // 实际上这可以在网关或用户服务组装，这里简单起见回填信息。若要获取 nickname/avatar，可以在 Mapper 中执行 JOIN 或在 Controller 中处理。
-        // 这里直接用 MyBatis Plus 返回，接下来我们将用自定义 Mapper 或前端通过 UserID 单独获取。
-        // 为快速实现，在 ReviewMapper 中写 JOIN 语句。
         Page<Review> page = new Page<>(current, size);
-        Page<Review> resultPage = this.baseMapper.queryReviewWithUserByShopId(page, shopId);
+        LambdaQueryWrapper<Review> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Review::getShopId, shopId).orderByDesc(Review::getCreateTime);
+        Page<Review> resultPage = this.page(page, wrapper);
+
+        for (Review review : resultPage.getRecords()) {
+            Result<User> userResult = userClient.getUserInfo(review.getUserId());
+            if (userResult != null && userResult.getData() != null) {
+                User user = userResult.getData();
+                review.setNickname(user.getNickname());
+                review.setUsername(user.getUsername());
+                review.setAvatar(user.getAvatar());
+            }
+        }
+
         return Result.ok(resultPage.getRecords(), resultPage.getTotal());
     }
 
-    @Override
+@Override
     public Result<List<Review>> queryReviewByUser(String token, Integer current, Integer size) {
         if (StringUtils.isBlank(token)) {
             return Result.fail("未登录");
@@ -115,9 +134,19 @@ public class ReviewServiceImpl extends ServiceImpl<ReviewMapper, Review> impleme
             return Result.fail("登录已过期");
         }
         Long userId = Long.valueOf(userIdStr);
-        
+
         Page<Review> page = new Page<>(current, size);
-        Page<Review> resultPage = this.baseMapper.queryReviewWithShopByUserId(page, userId);
+        LambdaQueryWrapper<Review> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Review::getUserId, userId).orderByDesc(Review::getCreateTime);
+        Page<Review> resultPage = this.page(page, wrapper);
+
+        for (Review review : resultPage.getRecords()) {
+            Result<Shop> shopResult = shopClient.getShopById(review.getShopId());
+            if (shopResult != null && shopResult.getData() != null) {
+                review.setShopName(shopResult.getData().getName());
+            }
+        }
+
         return Result.ok(resultPage.getRecords(), resultPage.getTotal());
     }
 }
