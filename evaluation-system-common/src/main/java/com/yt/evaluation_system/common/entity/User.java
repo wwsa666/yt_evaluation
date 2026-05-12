@@ -28,6 +28,14 @@ public class User implements Serializable {
 
     private LocalDateTime updateTime;
 
-    private Integer role; // 0=普通用户, 1=商家
+    private Integer role; // 0=普通用户, 1=商家, 2=系统管理员
+
+    private Integer verifyStatus; // 0=未认证, 1=待审核, 2=已认证, 3=已驳回
+
+    private String verifyImage;
+
+    private Integer merchantStatus; // 0=未申请, 1=审核中, 2=已通过, 3=已驳回
+
+    private Integer status; // 1=正常, 0=封禁
 }
 

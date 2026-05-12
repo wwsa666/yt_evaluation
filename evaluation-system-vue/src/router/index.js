@@ -11,7 +11,7 @@ const routes = [
         path: '/home',
         name: 'Home',
         component: () => import('../views/Home.vue'),
-        meta: { title: '首页' }
+        meta: { title: '首页', requiresAuth: true }
       },
       {
         path: '/shop/:id',
@@ -57,6 +57,18 @@ const routes = [
     name: 'Login',
     component: () => import('../views/Login.vue'),
     meta: { title: '登录注册' }
+  },
+  {
+    path: '/admin/login',
+    name: 'AdminLogin',
+    component: () => import('../views/AdminLogin.vue'),
+    meta: { title: '管理员登录' }
+  },
+  {
+    path: '/admin/dashboard',
+    name: 'AdminDashboard',
+    component: () => import('../views/AdminDashboard.vue'),
+    meta: { title: '管理后台', requiresAuth: true, requiresAdmin: true }
   }
 ]
 
@@ -67,13 +79,15 @@ const router = createRouter({
 
 // 路由守卫：标题设置 & 权限拦截
 router.beforeEach((to, from, next) => {
-  document.title = to.meta.title ? `${to.meta.title} - 随便点评` : '随便点评系统'
+  document.title = to.meta.title ? `${to.meta.title} - 校园美食雷达` : '校园美食雷达'
   
   const userStore = useUserStore()
   if (to.meta.requiresAuth && !userStore.token) {
     next('/login')
   } else if (to.meta.requiresMerchant && userStore.userInfo?.role !== 1) {
     next('/home')
+  } else if (to.meta.requiresAdmin && userStore.userInfo?.role !== 2) {
+    next('/')
   } else {
     next()
   }

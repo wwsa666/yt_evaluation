@@ -25,6 +25,7 @@
                 score-template=""
               />
               <span class="count">{{ shop.commentsCount || 0 }} 条评价</span>
+              <span class="count view-count" style="margin-left: 10px;"><el-icon><View /></el-icon> {{ shop.viewCount || 0 }} 次浏览</span>
             </div>
           </div>
           
@@ -39,9 +40,16 @@
       <div class="reviews-section">
         <div class="section-title">
           <h2>用户评价</h2>
-          <el-button type="primary" @click="showReviewForm = true" v-if="userStore.token">
-            <el-icon><EditPen /></el-icon> 写点评
-          </el-button>
+          <template v-if="userStore.token">
+            <el-button type="primary" @click="showReviewForm = true" v-if="userStore.userInfo?.verifyStatus === 2">
+              <el-icon><EditPen /></el-icon> 写点评
+            </el-button>
+            <el-tooltip v-else content="仅认证学生可评价" placement="top">
+              <el-button type="info" @click="$router.push('/profile')">
+                <el-icon><Lock /></el-icon> 去认证
+              </el-button>
+            </el-tooltip>
+          </template>
           <el-button type="primary" plain @click="$router.push('/login')" v-else>
             登录后评价
           </el-button>
@@ -51,7 +59,12 @@
         <transition name="el-zoom-in-top">
           <div v-if="showReviewForm" class="review-form glass-panel">
             <h3>发表您的评价</h3>
-            <el-rate v-model="newReview.rating" size="large" />
+            <div class="multi-rating-box">
+              <div class="rating-item"><span>口味：</span><el-rate v-model="newReview.scoreTaste" /></div>
+              <div class="rating-item"><span>环境：</span><el-rate v-model="newReview.scoreEnv" /></div>
+              <div class="rating-item"><span>服务：</span><el-rate v-model="newReview.scoreService" /></div>
+              <div class="rating-item"><span>性价比：</span><el-rate v-model="newReview.scoreValue" /></div>
+            </div>
             <el-input
               v-model="newReview.content"
               type="textarea"
@@ -88,8 +101,18 @@
                       <el-button link type="danger" size="small" v-if="review.userId === userStore.userInfo?.id" @click="handleDelete(review.id)">删除</el-button>
                     </div>
                   </div>
-                  <el-rate :model-value="review.rating" disabled size="small" />
+                  <div class="score-tags" v-if="review.scoreTaste">
+                    <el-tag size="small" type="danger" effect="plain" style="margin-right:4px">口味: {{review.scoreTaste}}</el-tag>
+                    <el-tag size="small" type="success" effect="plain" style="margin-right:4px">环境: {{review.scoreEnv}}</el-tag>
+                    <el-tag size="small" type="warning" effect="plain" style="margin-right:4px">服务: {{review.scoreService}}</el-tag>
+                    <el-tag size="small" type="info" effect="plain">性价比: {{review.scoreValue}}</el-tag>
+                  </div>
                   <p class="review-text">{{ review.content }}</p>
+                  <div class="review-footer-actions" style="margin-top: 10px;">
+                    <el-button size="small" plain @click="handleLike(review.id)" style="border-radius: 15px;">
+                      👍 {{ review.likes || 0 }} 赞
+                    </el-button>
+                  </div>
                 </div>
               </div>
 
@@ -140,9 +163,9 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useUserStore } from '../stores/user'
-import { getShopDetail } from '../api/shop'
-import { getReviewsByShop, addReview, deleteReview } from '../api/review'
-import { Location, EditPen } from '@element-plus/icons-vue'
+import { getShopDetail, incrementShopViewCount } from '../api/shop'
+import { getReviewsByShop, addReview, deleteReview, likeReview } from '../api/review'
+import { Location, EditPen, View, Lock } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
 const route = useRoute()
@@ -170,7 +193,10 @@ const mainReviews = computed(() => {
 const showReviewForm = ref(false)
 const submitting = ref(false)
 const newReview = ref({
-  rating: 0,
+  scoreTaste: 0,
+  scoreEnv: 0,
+  scoreService: 0,
+  scoreValue: 0,
   content: ''
 })
 
@@ -202,8 +228,8 @@ const fetchReviews = async () => {
 }
 
 const submitReview = async () => {
-  if (newReview.value.rating === 0) {
-    ElMessage.warning('请选择评分')
+  if (newReview.value.scoreTaste === 0 || newReview.value.scoreEnv === 0 || newReview.value.scoreService === 0 || newReview.value.scoreValue === 0) {
+    ElMessage.warning('请为所有维度打分')
     return
   }
   if (!newReview.value.content.trim()) {
@@ -215,13 +241,16 @@ const submitReview = async () => {
   try {
     await addReview({
       shopId: shopId,
-      rating: newReview.value.rating,
+      scoreTaste: newReview.value.scoreTaste,
+      scoreEnv: newReview.value.scoreEnv,
+      scoreService: newReview.value.scoreService,
+      scoreValue: newReview.value.scoreValue,
       content: newReview.value.content,
       parentId: null
     })
     ElMessage.success('评价发布成功！')
     showReviewForm.value = false
-    newReview.value = { rating: 0, content: '' }
+    newReview.value = { scoreTaste: 0, scoreEnv: 0, scoreService: 0, scoreValue: 0, content: '' }
     setTimeout(() => {
       fetchReviews()
       fetchShopDetail()
@@ -236,6 +265,24 @@ const submitReview = async () => {
 const openReplyForm = (parentId) => {
   replyingTo.value = parentId
   replyContent.value = ''
+}
+
+const handleLike = async (id) => {
+  if (!userStore.token) {
+    ElMessage.warning('请先登录')
+    return
+  }
+  try {
+    const res = await likeReview(id)
+    if (res.success) {
+      ElMessage.success('点赞成功')
+      fetchReviews()
+    } else {
+      ElMessage.error(res.errorMsg || '您已经点过赞了')
+    }
+  } catch (error) {
+    ElMessage.error('网络错误')
+  }
 }
 
 const submitReply = async (parentId) => {
@@ -288,6 +335,7 @@ const formatDate = (dateString) => {
 onMounted(() => {
   fetchShopDetail()
   fetchReviews()
+  incrementShopViewCount(shopId)
 })
 </script>
 

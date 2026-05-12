@@ -3,7 +3,7 @@
     <div class="login-box glass-panel">
       <div class="logo-area">
         <el-icon :size="48" color="var(--primary-color)"><Shop /></el-icon>
-        <h2>随便点评</h2>
+        <h2>校园美食雷达</h2>
         <p class="subtitle">{{ isLogin ? '欢迎回来，请登录' : '注册新账号，发现好店' }}</p>
       </div>
 
@@ -163,8 +163,13 @@ const handleLogin = async () => {
         const token = await login(loginForm)
         // 因为后端直接在 data 字段返回了 token 字符串，拦截器里直接 return res.data，所以这里拿到的就是 token 字符串
         userStore.setToken(token)
+        await userStore.fetchUserInfo()
         ElMessage.success('登录成功')
-        router.push('/home')
+        if (userStore.userInfo?.role === 2) {
+          router.push('/admin/dashboard')
+        } else {
+          router.push('/home')
+        }
       } catch (error) {
         // 请求内部拦截器已处理错误提示
       } finally {

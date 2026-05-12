@@ -20,4 +20,9 @@ public interface ShopService extends IService<Shop> {
     Result<List<Shop>> myShops(String token);
     Result<List<ShopStatsDaily>> getShopStats(Long shopId, Integer days, String token);
     Result<String> toggleShopStatus(Long shopId, String token);
+    Result<String> incrementViewCount(Long id);
+
+    // Admin APIs
+    Result<com.baomidou.mybatisplus.core.metadata.IPage<Shop>> getAdminShopList(Integer current, Integer size, String token);
+    Result<java.util.Map<String, Object>> getAdminStats(String token);
 }

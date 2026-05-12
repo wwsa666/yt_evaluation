@@ -44,5 +44,33 @@ public class ReviewController {
         String token = request.getHeader("Authorization");
         return reviewService.deleteReview(id, token);
     }
+
+    @PostMapping("/like/{id}")
+    public Result<String> likeReview(@PathVariable Long id, HttpServletRequest request) {
+        String token = request.getHeader("Authorization");
+        return reviewService.likeReview(id, token);
+    }
+
+    // ======================== 管理端接口 ========================
+    @GetMapping("/admin/list")
+    public Result<com.baomidou.mybatisplus.core.metadata.IPage<Review>> getAdminReviewList(
+            @RequestParam(defaultValue = "1") Integer current,
+            @RequestParam(defaultValue = "10") Integer size,
+            HttpServletRequest request) {
+        String token = request.getHeader("Authorization");
+        return reviewService.getAdminReviewList(current, size, token);
+    }
+
+    @DeleteMapping("/admin/delete/{id}")
+    public Result<String> adminDeleteReview(@PathVariable Long id, HttpServletRequest request) {
+        String token = request.getHeader("Authorization");
+        return reviewService.adminDeleteReview(id, token);
+    }
+
+    @GetMapping("/admin/stats")
+    public Result<java.util.Map<String, Object>> getAdminStats(HttpServletRequest request) {
+        String token = request.getHeader("Authorization");
+        return reviewService.getAdminStats(token);
+    }
 }
 

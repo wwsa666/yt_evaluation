@@ -30,3 +30,32 @@ export function deleteReview(id) {
     method: 'delete'
   })
 }
+
+export function likeReview(id) {
+  return request({
+    url: `/review/like/${id}`,
+    method: 'post'
+  })
+}
+
+export function getAdminReviewList(current = 1, size = 10) {
+  return request({
+    url: '/review/admin/list',
+    method: 'get',
+    params: { current, size }
+  })
+}
+
+export function adminDeleteReview(id) {
+  return request({
+    url: `/review/admin/delete/${id}`,
+    method: 'delete'
+  })
+}
+
+export function getAdminReviewStats() {
+  return request({
+    url: '/review/admin/stats',
+    method: 'get'
+  })
+}

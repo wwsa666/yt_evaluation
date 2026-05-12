@@ -21,3 +21,25 @@ export function getShopDetail(id) {
     method: 'get'
   })
 }
+
+export function incrementShopViewCount(id) {
+  return request({
+    url: `/shop/${id}/view`,
+    method: 'post'
+  })
+}
+
+export function getAdminShopList(current = 1, size = 10) {
+  return request({
+    url: '/shop/admin/list',
+    method: 'get',
+    params: { current, size }
+  })
+}
+
+export function getAdminShopStats() {
+  return request({
+    url: '/shop/admin/stats',
+    method: 'get'
+  })
+}

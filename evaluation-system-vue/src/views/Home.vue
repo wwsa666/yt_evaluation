@@ -2,14 +2,14 @@
   <div class="home-container">
     <!-- Hero Section -->
     <div class="hero-section glass-panel">
-      <h1>发现城市里的<span class="highlight">好味道</span>与<span class="highlight">好时光</span></h1>
-      <p>真实的用户点评，帮您找到最值得去的每一个地方</p>
+      <h1>发现校园周边的<span class="highlight">宝藏店铺</span></h1>
+      <p>大学生本地美食推荐，学长学姐带你吃！</p>
       
       <!-- 搜索框暂不实现复杂功能，仅作占位或简单展示 -->
       <div class="search-bar">
         <el-input
           v-model="searchQuery"
-          placeholder="搜索商铺名称..."
+          placeholder="搜搜看周边有什么好吃的..."
           size="large"
           class="search-input"
           clearable

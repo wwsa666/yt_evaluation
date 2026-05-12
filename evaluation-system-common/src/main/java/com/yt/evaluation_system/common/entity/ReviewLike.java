@@ -6,37 +6,19 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
-@TableName("shops")
-public class Shop implements Serializable {
+@TableName("review_likes")
+public class ReviewLike implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @TableId(type = IdType.AUTO)
     private Long id;
 
-    private Long typeId;
+    private Long reviewId;
 
-    private String name;
-
-    private String address;
-
-    private String image;
-
-    private BigDecimal avgRating;
-
-    private Integer commentsCount;
-
-    private Integer viewCount;
-
-    private Long ownerId;
-
-    private String description;
-
-    private Integer status; // 0=下架, 1=正常营业
+    private Long userId;
 
     private LocalDateTime createTime;
 }
-

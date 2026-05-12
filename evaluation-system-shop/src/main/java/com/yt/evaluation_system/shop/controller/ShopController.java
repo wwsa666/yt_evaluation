@@ -39,6 +39,11 @@ public class ShopController {
         return shopService.queryShopById(id);
     }
 
+    @PostMapping("/{id}/view")
+    public Result<String> incrementViewCount(@PathVariable("id") Long id) {
+        return shopService.incrementViewCount(id);
+    }
+
     // ======================== 商家端接口 ========================
 
     @PostMapping("/create")
@@ -72,5 +77,21 @@ public class ShopController {
     public Result<String> toggleShopStatus(@PathVariable Long shopId, HttpServletRequest request) {
         String token = request.getHeader("Authorization");
         return shopService.toggleShopStatus(shopId, token);
+    }
+
+    // ======================== 管理端接口 ========================
+    @GetMapping("/admin/list")
+    public Result<com.baomidou.mybatisplus.core.metadata.IPage<Shop>> getAdminShopList(
+            @RequestParam(defaultValue = "1") Integer current,
+            @RequestParam(defaultValue = "10") Integer size,
+            HttpServletRequest request) {
+        String token = request.getHeader("Authorization");
+        return shopService.getAdminShopList(current, size, token);
+    }
+
+    @GetMapping("/admin/stats")
+    public Result<java.util.Map<String, Object>> getAdminStats(HttpServletRequest request) {
+        String token = request.getHeader("Authorization");
+        return shopService.getAdminStats(token);
     }
 }

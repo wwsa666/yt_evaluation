@@ -5,7 +5,7 @@
       <div class="header-content">
         <div class="logo" @click="$router.push('/')">
           <el-icon :size="28" color="var(--primary-color)"><Shop /></el-icon>
-          <span class="logo-text">随便点评</span>
+          <span class="logo-text">校园美食雷达</span>
         </div>
         
         <nav class="nav-links">
@@ -18,7 +18,11 @@
             <el-dropdown trigger="click" @command="handleCommand">
               <span class="user-profile">
                 <el-avatar :size="32" :src="userStore.userInfo?.avatar || 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png'" />
-                <span class="username">{{ userStore.userInfo?.nickname || userStore.userInfo?.username || '默认用户' }}</span>
+                <span class="username">
+                  {{ userStore.userInfo?.nickname || userStore.userInfo?.username || '默认用户' }}
+                  <el-tag v-if="userStore.userInfo?.verifyStatus === 2" size="small" type="success" effect="dark" style="margin-left: 4px">已认证</el-tag>
+                  <el-tag v-else size="small" type="info" effect="dark" style="margin-left: 4px">未认证</el-tag>
+                </span>
                 <el-icon><ArrowDown /></el-icon>
               </span>
               <template #dropdown>
@@ -47,7 +51,7 @@
     </main>
     
     <footer class="footer">
-      <p>&copy; 2026 随便点评. All rights reserved.</p>
+      <p>&copy; 2026 校园美食雷达. All rights reserved.</p>
     </footer>
   </div>
 </template>
@@ -72,7 +76,7 @@ const handleCommand = (command) => {
   if (command === 'logout') {
     userStore.clearToken()
     ElMessage.success('已退出登录')
-    router.push('/home')
+    router.push('/login')
   } else if (command === 'profile') {
     router.push('/my-profile')
   } else if (command === 'merchant') {

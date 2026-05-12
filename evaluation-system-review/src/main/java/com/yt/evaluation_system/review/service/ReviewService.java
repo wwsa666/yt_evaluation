@@ -11,5 +11,11 @@ public interface ReviewService extends IService<Review> {
     Result<List<Review>> queryReviewByShop(Long shopId, Integer current, Integer size);
     Result<List<Review>> queryReviewByUser(String token, Integer current, Integer size);
     Result<String> deleteReview(Long id, String token);
+    Result<String> likeReview(Long id, String token);
+
+    // Admin APIs
+    Result<com.baomidou.mybatisplus.core.metadata.IPage<Review>> getAdminReviewList(Integer current, Integer size, String token);
+    Result<String> adminDeleteReview(Long id, String token);
+    Result<java.util.Map<String, Object>> getAdminStats(String token);
 }
 

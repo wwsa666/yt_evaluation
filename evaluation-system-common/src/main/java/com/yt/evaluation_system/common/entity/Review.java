@@ -20,7 +20,17 @@ public class Review implements Serializable {
 
     private Long shopId;
 
-    private Integer rating;
+    private Integer rating; // Overall rating (calculated or single)
+
+    private Integer likes;
+
+    private java.math.BigDecimal scoreTaste;
+
+    private java.math.BigDecimal scoreEnv;
+
+    private java.math.BigDecimal scoreService;
+
+    private java.math.BigDecimal scoreValue;
 
     private String content;
 
