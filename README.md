@@ -93,21 +93,13 @@ campus-food-radar/
 ## 项目收获
 
 - 微服务拆分与架构设计
-
 - Nacos 服务注册发现与配置管理
-
 - Gateway 网关路由与负载均衡
-
 - OpenFeign 跨服务调用与数据聚合
-
 - Redis 缓存与分布式 Session
-
 - RocketMQ 异步消息处理
-
 - Sentinel 接口限流与熔断降级
-
 - JWT Token 鉴权机制
-
 
   ## 项目启动
 

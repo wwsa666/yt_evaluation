@@ -36,3 +36,4 @@ build/
 .vscode/
 md/
 项目改造文档.md
+.sql
