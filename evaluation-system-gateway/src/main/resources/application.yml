@@ -4,6 +4,17 @@ spring:
   application:
     name: gateway-service
   cloud:
+    # Sentinel 限流配置
+    sentinel:
+      transport:
+        dashboard: localhost:8858
+        port: 8719
+      eager: true
+      scg:
+        fallback:
+          mode: response
+          response-status: 429
+          response-body: '{"success":false,"errorMsg":"请求过于频繁，请稍后再试"}'
     nacos:
       discovery:
         server-addr: 127.0.0.1:8848
@@ -47,15 +58,5 @@ spring:
     multipart:
       max-file-size: 10MB
       max-request-size: 10MB
-  # Sentinel 限流配置
-  cloud:
-    sentinel:
-      transport:
-        dashboard: localhost:8858
-        port: 8719
-      eager: true
-      scg:
-        fallback:
-          mode: response
-          response-status: 429
-          response-body: '{"success":false,"errorMsg":"请求过于频繁，请稍后再试"}'
+
+
